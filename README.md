@@ -1,5 +1,5 @@
 # DirtyFrag (CVE-2026-43284)
-
+[English](README.md) | [简体中文](README.zh-CN.md)
 DirtyFrag is a hardened fork of [diabl0w/DFRoot](https://github.com/diabl0w/DFRoot). It exploits
 CVE-2026-43284 (DirtyFrag), a kernel page cache write primitive, to load a kernel module without an
 unlocked bootloader and without a custom kernel. The fork targets Samsung phones (OneUI, RKP and KDP
