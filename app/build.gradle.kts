@@ -10,6 +10,7 @@ android {
         applicationId = "df.root"
         minSdk = 32
         targetSdk = 37
+        ndkVersion = "28.2.13676358"
         versionCode = 33
         versionName = "1.16"
 
@@ -69,6 +70,7 @@ androidComponents {
     externalNativeBuild {
         cmake {
             path("src/main/jni/CMakeLists.txt")
+            version = "4.1.2"
         }
     }
 

@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
      *  /data/user_de/0/df.root/, so every pref the exploit depends on must live
      *  there, not in credential-protected storage. */
     private Context mDeCtx;
-    /** Package name of the SU manager whose libksud.so gets staged, or null. */
+    /** Package name of the SU manager whose libeexgslcpwg.so gets staged, or null. */
     private String suManagerPkg;
     private CharSequence suManagerLabel;
     /** A failed run locks the Run button until reboot (page-cache patch). */
@@ -212,28 +212,28 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         // v4.0 renamed every marker and dropped the "env adopted" / "partitions set
         // ro" confirmations, so these steps are re-keyed to the new table.
         if (t.startsWith("kernel module: launching bootstrap")) {
-            setSeg2(0.14f, "Verification", 0xFFFFFFFF);
+            setSeg2(0.14f, R.string.progress_verification, 0xFFFFFFFF);
         }
         if (t.startsWith("bootstrap: loading app preferences file")) {
-            setSeg2(0.28f, "Verification", 0xFFFFFFFF);
+            setSeg2(0.28f, R.string.progress_verification, 0xFFFFFFFF);
         }
         if (t.startsWith("bootstrap: cloning zygote env")
                 || t.startsWith("bootstrap: WARNING - clone zygote env failed")) {
-            setSeg2(0.42f, "Verification", 0xFFFFFFFF);
+            setSeg2(0.42f, R.string.progress_verification, 0xFFFFFFFF);
         }
         if (t.startsWith("bootstrap: setting partitions ro")
                 || t.startsWith("bootstrap: WARNING - set partitions ro failed")) {
-            setSeg2(0.57f, "Verification", 0xFFFFFFFF);
+            setSeg2(0.57f, R.string.progress_verification, 0xFFFFFFFF);
         }
         if (t.startsWith("bootstrap: disabling ksu modules")) {
-            setSeg2(0.71f, "Verification", 0xFFFFFFFF);
+            setSeg2(0.71f, R.string.progress_verification, 0xFFFFFFFF);
         }
         if (t.startsWith("bootstrap: starting SU daemon")) {
-            setSeg2(0.85f, "Verification", 0xFFFFFFFF);
+            setSeg2(0.85f, R.string.progress_verification, 0xFFFFFFFF);
         }
         if (t.equals("ksud start: SUCCESS")) {
             setSeg1(1f);
-            setSeg2(1f, "Verified", 0xFFFFFFFF);
+            setSeg2(1f, R.string.state_verified, 0xFFFFFFFF);
         }
         if (exploitPhase.equals("cleanup") && t.startsWith("restoring")) {
             cleanupSteps++;
@@ -245,8 +245,8 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         binding.twoStep.setSeg1(p, Math.round(p * 100) + "%");
     }
 
-    private void setSeg2(float p, String label, int color) {
-        binding.twoStep.setSeg2(p, label, color);
+    private void setSeg2(float p, @androidx.annotation.StringRes int labelRes, int color) {
+        binding.twoStep.setSeg2(p, labelRes, color);
     }
 
     /** VIS4: the room the stack keeps under the advanced-log card, which is also
@@ -484,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         mExec.execute(this::refreshOdin);
 
         // SU Manager card: upstream 3.2 deleted the bundled assets/ksud, so the
-        // exploit stages libksud.so out of the chosen manager's
+        // exploit stages libeexgslcpwg.so out of the chosen manager's
         // nativeLibraryDir and refuses to run without one. Only apps that
         // actually ship that library are offered.
         loadSuManagerPref();
@@ -502,8 +502,8 @@ public class MainActivity extends AppCompatActivity implements IReporter {
                 .getBoolean("disable_modules", false));
         moduleRefresh = false;
         binding.modulesSubtitle.setText(binding.switchModules.isChecked()
-                ? "Enabled - Active at next reroot"
-                : "Disabled - No Modules on reroot");
+                ? R.string.modules_enabled
+                : R.string.modules_disabled);
         binding.switchModules.setOnCheckedChangeListener((btn, on) -> {
             if (moduleRefresh) return;
             btn.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
@@ -586,7 +586,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
                 && last.toLowerCase().contains("=== exploit failed");
         if (rootedNow || lastSuccess) {
             binding.twoStep.setSeg1(1f, "100%");
-            binding.twoStep.setSeg2(1f, "Verified", 0xFFFFFFFF);
+            binding.twoStep.setSeg2(1f, R.string.state_verified, 0xFFFFFFFF);
         } else if (lastFailed) {
             setFailedState();
         }
@@ -597,14 +597,14 @@ public class MainActivity extends AppCompatActivity implements IReporter {
             if (!runArmed) {
                 runArmed = true;
                 v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-                binding.btnRun.setText("Are you sure");
+                binding.btnRun.setText(R.string.btn_are_you_sure);
                 return;
             }
             runArmed = false;
             v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
             running = true;
             binding.btnRun.setEnabled(false);
-            binding.btnRun.setText("Running");
+            binding.btnRun.setText(R.string.btn_running);
             // Same dark greyed-out styling as the Rooted state.
             binding.btnRun.setTextColor(0xFF6E6E6E);
             binding.btnRun.setBackgroundTintList(ColorStateList.valueOf(0xFF1F1F1F));
@@ -663,7 +663,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
             // -- Github Page row --
             TextView ghRow = new TextView(this);
             ghRow.setBackgroundResource(R.drawable.menu_row_highlight);
-            ghRow.setText("Github Page");
+            ghRow.setText(R.string.menu_github);
             ghRow.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.START);
             ghRow.setPadding((int) (20 * md), 0, 0, 0);
             ghRow.setTextColor(0xFFE8E8E8);
@@ -681,7 +681,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
             exRow.setPadding((int) (20 * md), 0, 0, 0);
             TextView exText = new TextView(this);
             exRow.setBackgroundResource(R.drawable.menu_row_highlight);
-            exText.setText("Expert Mode");
+            exText.setText(R.string.menu_expert_mode);
             exText.setTextColor(0xFFE8E8E8);
             exText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15);
             exRow.addView(exText);
@@ -714,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
             //    user hid. --
             TextView rlRow = new TextView(this);
             rlRow.setBackgroundResource(R.drawable.menu_row_highlight);
-            rlRow.setText("Reset layout");
+            rlRow.setText(R.string.menu_reset_layout);
             rlRow.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.START);
             rlRow.setPadding((int) (20 * md), 0, 0, 0);
             rlRow.setTextColor(0xFFE8E8E8);
@@ -827,8 +827,10 @@ public class MainActivity extends AppCompatActivity implements IReporter {
      *  disabled toggles, titles suffixed with (Expert). */
     private void applyExpertMode() {
         boolean ok = expertMode;
-        binding.tvAutorunTitle.setText(ok ? "Autorun" : "Autorun (Expert)");
-        binding.tvRebootTitle.setText(ok ? "Auto reboot" : "Auto reboot (Expert)");
+        binding.tvAutorunTitle.setText(ok ? R.string.autorun_title
+                : R.string.autorun_title_expert);
+        binding.tvRebootTitle.setText(ok ? R.string.reboot_title
+                : R.string.reboot_title_expert);
         binding.tvAutorunTitle.setTextColor(ok ? 0xFFFFFFFF : 0xFF6E6E6E);
         binding.tvAutorunDesc.setTextColor(ok ? 0xFF9E9E9E : 0xFF5A5A5A);
         binding.tvRebootTitle.setTextColor(ok ? 0xFFFFFFFF : 0xFF6E6E6E);
@@ -934,7 +936,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
             b.setImageTintList(ColorStateList.valueOf(0xFF3A3A3C));
             b.setScaleType(android.widget.ImageView.ScaleType.CENTER);
             b.setPadding(0, 0, 0, 0);
-            b.setContentDescription("Hide card");
+            b.setContentDescription(getString(R.string.cd_hide_card));
             // Above the lifted card (18dp), below the menu dim layer (30dp).
             b.setElevation(26 * md);
             b.setVisibility(View.GONE);
@@ -1155,13 +1157,13 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         // The subtitle is the whole message. Nothing is announced over the bottom
         // of the screen for a switch the user can already see move.
         binding.modulesSubtitle.setText(on
-                ? "Enabled - Active at next reroot"
-                : "Disabled - No Modules on reroot");
+                ? R.string.modules_enabled
+                : R.string.modules_disabled);
     }
 
     // ---- SU manager picker --------------------------------------------------
 
-    /** One candidate: an app that actually ships libksud.so. */
+    /** One candidate: an app that actually ships libeexgslcpwg.so. */
     private static final class SuManagerEntry {
         final String packageName;
         final CharSequence label;
@@ -1172,7 +1174,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         }
     }
 
-    /** Every installed app carrying libksud.so in its native lib dir - exactly
+    /** Every installed app carrying libeexgslcpwg.so in its native lib dir - exactly
      *  the set ExploitRunner.stageAssets() can use, so anything listed here is
      *  guaranteed to pass the runtime check too. */
     private List<SuManagerEntry> scanSuManagers() {
@@ -1180,8 +1182,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         PackageManager pm = getPackageManager();
         for (ApplicationInfo ai : pm.getInstalledApplications(0)) {
             if (ai.packageName.equals(getPackageName())) continue;
-            if (ai.nativeLibraryDir == null) continue;
-            if (!new File(ai.nativeLibraryDir, "libksud.so").exists()) continue;
+            if (!ExploitRunner.hasKsud(ai)) continue;
             out.add(new SuManagerEntry(ai.packageName, pm.getApplicationLabel(ai)));
         }
         out.sort((a, b) -> a.label.toString().compareToIgnoreCase(b.label.toString()));
@@ -1189,7 +1190,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
     }
 
     /** Restores the saved selection, dropping it if that app is gone or no
-     *  longer ships libksud.so. */
+     *  longer ships libeexgslcpwg.so. */
     private void loadSuManagerPref() {
         SharedPreferences sp = mDeCtx.getSharedPreferences("dfroot", MODE_PRIVATE);
         String saved = sp.getString("su_manager", null);
@@ -1206,8 +1207,8 @@ public class MainActivity extends AppCompatActivity implements IReporter {
             if (suManagerPkg == null) sp.edit().remove("su_manager").apply();
         }
         binding.suManagerSubtitle.setText(suManagerPkg == null
-                ? "Not selected - required"
-                : suManagerLabel + "  (" + suManagerPkg + ")");
+                ? getString(R.string.su_manager_not_selected)
+                : getString(R.string.su_manager_selected, suManagerLabel, suManagerPkg));
         binding.suManagerSubtitle.setTextColor(suManagerPkg == null
                 ? 0xFFE57373 : 0xFF9E9E9E);
     }
@@ -1226,7 +1227,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
 
         if (apps.isEmpty()) {
             TextView none = new TextView(this);
-            none.setText("No app with libksud.so found");
+            none.setText(R.string.no_su_manager_found);
             none.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.START);
             none.setPadding((int) (20 * md), (int) (12 * md), (int) (20 * md), (int) (12 * md));
             none.setTextColor(0xFF6E6E6E);
@@ -1330,7 +1331,8 @@ public class MainActivity extends AppCompatActivity implements IReporter {
                 .edit().putString("su_manager", e.packageName).apply();
         suManagerPkg = e.packageName;
         suManagerLabel = e.label;
-        binding.suManagerSubtitle.setText(e.label + "  (" + e.packageName + ")");
+        binding.suManagerSubtitle.setText(
+                getString(R.string.su_manager_selected, e.label, e.packageName));
         binding.suManagerSubtitle.setTextColor(0xFF9E9E9E);
         updateRunButton();
     }
@@ -1353,7 +1355,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         }
         boolean ok = suManagerPkg != null;
         binding.btnRun.setEnabled(ok);
-        binding.btnRun.setText("Run exploit");
+        binding.btnRun.setText(R.string.btn_run_exploit);
         binding.btnRun.setTextColor(ok ? 0xFFE0E0E0 : 0xFF6E6E6E);
         binding.btnRun.setBackgroundTintList(ColorStateList.valueOf(ok ? 0xFF7A7A7A : 0xFF1F1F1F));
         ((com.google.android.material.button.MaterialButton) binding.btnRun)
@@ -1519,11 +1521,11 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         box.setBackgroundResource(R.drawable.popup_bg);
         box.setPadding(0, (int) (6 * md), 0, (int) (6 * md));
 
-        box.addView(odinRow("Lockscreen", shown.lockscreenLabel()), odinRowLp(md));
+        box.addView(odinRow(getString(R.string.row_lockscreen), shown.lockscreenLabel()), odinRowLp(md));
         box.addView(odinSep(md), odinSepLp(md));
-        box.addView(odinRow("Maintenance Mode", shown.maintenanceLabel()), odinRowLp(md));
+        box.addView(odinRow(getString(R.string.row_maintenance), shown.maintenanceLabel()), odinRowLp(md));
         box.addView(odinSep(md), odinSepLp(md));
-        box.addView(odinRow("Device", shown.deviceLabel()), odinRowLp(md));
+        box.addView(odinRow(getString(R.string.row_device), shown.deviceLabel()), odinRowLp(md));
 
         box.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         int pw_w = Math.max(box.getMeasuredWidth(), (int) (230 * md));
@@ -1632,10 +1634,10 @@ public class MainActivity extends AppCompatActivity implements IReporter {
     private void setFailedState() {
         failedRun = true;
         binding.twoStep.setFailed(true);
-        binding.twoStep.setSeg1(seg1, "Failure");
-        binding.twoStep.setSeg2(1f, "Reboot", 0xFFE57373);
+        binding.twoStep.setSeg1(seg1, getString(R.string.state_failure));
+        binding.twoStep.setSeg2(1f, R.string.state_reboot, 0xFFE57373);
         binding.btnRun.setEnabled(false);
-        binding.btnRun.setText("Run exploit");
+        binding.btnRun.setText(R.string.btn_run_exploit);
         binding.btnRun.setTextColor(0xFF6E6E6E);
         binding.btnRun.setBackgroundTintList(ColorStateList.valueOf(0xFF1F1F1F));
         ((com.google.android.material.button.MaterialButton) binding.btnRun)
@@ -1652,7 +1654,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         int bg = (rooted || !ok) ? 0xFF1F1F1F : 0xFF7A7A7A;
         int stroke = (rooted || !ok) ? 0xFF1F1F1F : 0xFFA6A6A6;
         binding.btnRun.setEnabled(ok);
-        binding.btnRun.setText(rooted ? "Rooted" : "Run exploit");
+        binding.btnRun.setText(rooted ? R.string.btn_rooted : R.string.btn_run_exploit);
         binding.btnRun.setTextColor(fg);
         binding.btnRun.setBackgroundTintList(ColorStateList.valueOf(bg));
         ((com.google.android.material.button.MaterialButton) binding.btnRun)
@@ -1873,7 +1875,7 @@ public class MainActivity extends AppCompatActivity implements IReporter {
                 boolean rooted = new File("/dev/df").exists();
                 if (rooted) {
                     setRootedState(true);
-                    binding.twoStep.setSeg2(1f, "Verified", 0xFFFFFFFF);
+                    binding.twoStep.setSeg2(1f, R.string.state_verified, 0xFFFFFFFF);
                 } else {
                     setFailedState();
                     setRootedState(false);

@@ -73,7 +73,7 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="start|center_vertical"
                     android:gravity="center"
-                    android:text="Update"
+                    android:text="更新"
                     android:textColor="#FF101418"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -203,7 +203,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="SU Manager"
+                    android:text="SU 管理器"
                     android:textColor="#FFFFFFFF"
                     android:textSize="16sp" />
 
@@ -211,7 +211,7 @@
                     android:id="@+id/suManagerSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Not selected - required"
+                    android:text="未选择 - 必填"
                     android:textColor="#FF9E9E9E"
                     android:textSize="12sp" />
 
@@ -265,7 +265,7 @@
                         android:id="@+id/tvAutorunTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Autorun"
+                        android:text="自动运行"
                         android:textColor="#FFFFFFFF"
                         android:textSize="16sp" />
 
@@ -273,7 +273,7 @@
                         android:id="@+id/tvAutorunDesc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Runs the exploit after boot"
+                        android:text="启动后运行漏洞利用程序"
                         android:textColor="#FF9E9E9E"
                         android:textSize="12sp" />
 
@@ -305,7 +305,7 @@
                         android:id="@+id/tvRebootTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Auto reboot"
+                        android:text="自动重启"
                         android:textColor="#FFFFFFFF"
                         android:textSize="16sp" />
 
@@ -313,7 +313,7 @@
                         android:id="@+id/tvRebootDesc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Soft reboots after root"
+                        android:text="Root 后软重启"
                         android:textColor="#FF9E9E9E"
                         android:textSize="12sp" />
 
@@ -361,7 +361,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="KernelSU Modules"
+                    android:text="KernelSU 模块"
                     android:textColor="#FFFFFFFF"
                     android:textSize="16sp" />
 
@@ -369,7 +369,7 @@
                     android:id="@+id/modulesSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Enabled - active at next reboot"
+                    android:text="已启用 - 下次重启时生效"
                     android:textColor="#FF9E9E9E"
                     android:textSize="12sp" />
 
@@ -416,14 +416,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Show advanced log"
+                    android:text="显示高级日志"
                     android:textColor="#FFFFFFFF"
                     android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Shows full scrollable log"
+                    android:text="显示完整可滚动日志"
                     android:textColor="#FF9E9E9E"
                     android:textSize="12sp" />
 
@@ -532,7 +532,7 @@
         android:paddingEnd="28dp"
         android:elevation="12dp"
         android:stateListAnimator="@null"
-        android:text="Run exploit"
+        android:text="运行漏洞利用"
         android:textSize="14sp"
         android:backgroundTint="#FF7A7A7A"
         android:textColor="#FFE0E0E0"
@@ -584,7 +584,7 @@
             android:layout_gravity="start|center_vertical"
             android:layout_marginStart="22dp"
             android:alpha="0"
-            android:text="Manager"
+            android:text="SU管理器"
             android:textColor="#FF1F1F1F"
             android:textSize="14sp" />
 

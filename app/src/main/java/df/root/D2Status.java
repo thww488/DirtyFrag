@@ -7,166 +7,192 @@ import android.provider.Settings;
 
 import java.util.Locale;
 
-/**
- * Whether this firmware will let the device into Odin (download) mode, or answer
- * a download-mode request with Samsung's D2 error.
- *
- * Galaxy firmwares from around April 2026 refuse download mode when the device is
- * locked in the everyday sense of the word. Samsung's system_server runs a
- * com.android.server.DmcService that writes three booleans - the DMC vault - into
- * a vaultkeeper trustlet in the TEE, and the bootloader reads them back before
- * deciding whether to start Odin or print the D2 error. The vault is
- * [lock, maintenance, at_command]: lock follows the lock-screen credential,
- * maintenance follows Samsung's maintenance mode, at_command is set by the
- * AT+SUDDLMOD / AT+FUS service escape hatch and cleared by the next boot. The
- * bootloader refuses Odin on [1, 0, 0].
- *
- * The vault itself is unreadable from an app: it lives in a trustlet behind
- * android.permission.ACCESS_VAULTKEEPER_SERVICE, which is signature|privileged,
- * and DirtyFrag is deliberately not a root client - it is the tool that gets you
- * root, so it has to work on a device that has none. Reading the vault is what
- * the first attempt at this feature did, which is why it could only ever answer
- * "unsupported" on a real Galaxy.
- *
- * So instead of reading the vault this reads the two inputs the vault is built
- * from, both of them public API: the lock-screen credential through
- * KeyguardManager, and maintenance mode through the Settings provider. That is
- * the same pair of signals DmcService turns into [lock, maintenance], so the
- * answer is computed from the same facts rather than copied out of a vault we
- * cannot open.
- *
- * The one input that cannot be read is at_command. It is assumed to be 0, which
- * is what it is after every boot unless a service tool has just authorised the
- * device, and it fails in the safe direction: a wrong guess can only make the dot
- * red when Odin would in fact have worked, never green when it would not.
- *
- * The dot is a verdict, and a verdict you cannot argue with is just a coloured
- * dot, so the pill also hands back the three facts behind it - lock screen,
- * maintenance mode, and whether this firmware gates download mode at all. The
- * toolbar submenu shows them as three lines, which means a dot the owner
- * disagrees with can be read straight off the screen instead of having to be
- * dug out of logcat.
- */
 final class D2Status {
 
-    /** What the toolbar dot is painted. */
-    enum Dot {
-        /** Nothing to indicate: not Samsung firmware, or older than the lockdown. */
-        GREY,
-        /** Odin will be let in: no credential, or maintenance mode holding the door. */
-        GREEN,
-        /** The D2 error: download mode refused while the device is locked. */
-        RED
+    enum Dot { GREY, GREEN, RED }
+
+    /** 三态支持等级。 */
+    enum Support {
+        /** 漏洞存在，大概率可利用。 */
+        YES,
+        /** 内核已修或补丁处于过渡期，仍可能有用。 */
+        MAYBE,
+        /** 窗口外，不判断。 */
+        NO
     }
 
     static final class Result {
-        /** Does this firmware gate download mode at all? */
-        final boolean supported;
-        /** Is a PIN, pattern or password set? That is the vault's lock. */
+        final boolean supported;      // 是否参与红/绿判断（YES 或 MAYBE）
+        final Support support;        // 三态
         final boolean lockscreen;
-        /** Is Samsung's maintenance mode on? */
         final boolean maintenance;
         final Dot dot;
-        /** One line naming every input, including the ones the rows leave out. */
         final String detail;
 
-        Result(boolean supported, boolean lockscreen, boolean maintenance,
-               Dot dot, String detail) {
+        Result(boolean supported, Support support, boolean lockscreen,
+               boolean maintenance, Dot dot, String detail) {
             this.supported = supported;
+            this.support = support;
             this.lockscreen = lockscreen;
             this.maintenance = maintenance;
             this.dot = dot;
             this.detail = detail;
         }
 
-        /** The three submenu rows, worded the way the pill means them. */
-        String lockscreenLabel() {
-            return lockscreen ? "Yes" : "No";
-        }
-
-        String maintenanceLabel() {
-            return maintenance ? "On" : "Off";
-        }
+        String lockscreenLabel() { return lockscreen ? "是" : "不"; }
+        String maintenanceLabel() { return maintenance ? "开" : "关"; }
 
         String deviceLabel() {
-            return supported ? "Supported" : "Unsupported";
+            switch (support) {
+                case YES:   return "支持";
+                case MAYBE: return "可能支持";
+                default:    return "不支持";
+            }
         }
     }
 
-    /**
-     * Settings provider keys Samsung has been seen using for maintenance mode,
-     * Global first then Secure. An absent key simply reads back null, so a wrong
-     * guess costs a pessimistic red dot rather than a crash - the submenu row
-     * then reads Off, and the detail line names the key that answered, so if
-     * Samsung renames it in some future firmware a wrong dot is traceable from one
-     * log line instead of failing silently the way the vault read did.
-     */
     private static final String[] MAINTENANCE_KEYS = {
-            "maintenance_mode",
-            "maintenance_mode_status",
-            "sec_maintenance_mode",
+            "maintenance_mode", "maintenance_mode_status", "sec_maintenance_mode",
     };
 
-    /**
-     * First security patch level that carries the lockdown. Older firmware has no
-     * DmcService and no vault, so a red dot there would be a lie and it gets a
-     * grey one instead. The patch level is only a proxy for the firmware
-     * generation, which is why it can decide grey-versus-red but never green.
-     */
     private static final String FIRST_LOCKDOWN_PATCH = "2026-04-01";
+    private static final String PATCH_MAYBE_START   = "2026-09-01";
+    private static final String PATCH_MAYBE_END     = "2026-10-01"; // 不含
 
-    /**
-     * Reads the state. Cheap, but call it off the UI thread anyway: probing the
-     * Settings provider is a binder round trip per key.
-     */
+    // 内核分支 → 首个修复版本。key 形如 "5.10"，value {major, minor, patch}
+    private static final int[][] KERNEL_FIX = {
+            {5, 10, 255},
+            {5, 15, 206},
+            {6, 1, 172},
+            {6, 6, 138},
+            {6, 12, 87},
+            {6, 18, 28},
+            {7, 0, 5},
+    };
+
     static Result read(Context ctx) {
-        // A device only "supports" the indicator when its firmware gates download
-        // mode at all: no non-Samsung firmware does, and neither does Samsung
-        // firmware older than the lockdown. Those get a grey dot rather than a
-        // pill that quietly vanishes, and the submenu says why in one word.
-        boolean supported = isSamsung() && !predatesLockdown();
+        boolean samsung = isSamsung();
+
+        // 内核三态
+        Support kernelSupport = kernelSupport();
+
+        // 补丁三态
+        Support patchSupport = patchSupport();
+
+        // 合成：取更保守（YES > MAYBE > NO）
+        Support support;
+        if (samsung) {
+            // 三星仍走原规则：补丁 >= 2026-04-01 才参与判断
+            support = predatesLockdown() ? Support.NO : Support.MAYBE;
+            // 三星补丁在 9 月前视为 YES
+            if (!predatesLockdown()) {
+                Support ps = patchSupport;
+                support = (ps == Support.YES) ? Support.YES : Support.MAYBE;
+            }
+        } else {
+            support = combine(kernelSupport, patchSupport);
+        }
+
+        boolean supported = support != Support.NO;
         boolean secure = isLockScreenSecured(ctx);
         String maintenanceKey = maintenanceModeKey(ctx);
         boolean maintenance = maintenanceKey != null;
 
-        // The bootloader refuses Odin on [1, 0, 0] - a credential, no maintenance
-        // mode and no service authorisation - so a free lock screen or an open
-        // maintenance mode both mean green. at_command is assumed cleared, which
-        // can only ever make the dot too pessimistic, never too optimistic.
         Dot dot = !supported ? Dot.GREY
                 : (secure && !maintenance) ? Dot.RED : Dot.GREEN;
 
         StringBuilder d = new StringBuilder();
         d.append(Build.MANUFACTURER).append(' ').append(Build.MODEL)
                 .append(", patch ").append(Build.VERSION.SECURITY_PATCH)
-                .append(": lockscreen=").append(secure ? "credential" : "none")
+                .append(", kernel ").append(System.getProperty("os.version", "?"))
+                .append(": samsung=").append(samsung)
+                .append(" kernelSupport=").append(kernelSupport)
+                .append(" patchSupport=").append(patchSupport)
+                .append(" final=").append(support)
+                .append(" lockscreen=").append(secure ? "credential" : "none")
                 .append(" maintenance=").append(maintenanceKey != null ? maintenanceKey : "off or unreadable")
                 .append(" at_command=0 assumed -> ");
         switch (dot) {
-            case RED:
-                d.append("red, D2 error expected: download mode refused");
-                break;
-            case GREEN:
-                d.append("green, Odin allowed");
-                break;
-            default:
-                d.append("grey, this device does not gate download mode");
-                break;
+            case RED:   d.append("red, D2 error expected"); break;
+            case GREEN: d.append("green, Odin allowed"); break;
+            default:    d.append("grey, outside window"); break;
         }
-        return new Result(supported, secure, maintenance, dot, d.toString());
+        return new Result(supported, support, secure, maintenance, dot, d.toString());
+    }
+
+    /**
+    * 合成内核与补丁两项支持等级：
+    *   - 两项都 YES → YES
+    *   - 两项都 NO  → NO
+    *   - 其余（一项 YES 一项 NO、含 MAYBE）→ MAYBE
+     */
+    private static Support combine(Support a, Support b) {
+       if (a == Support.YES && b == Support.YES) return Support.YES;
+       if (a == Support.NO && b == Support.NO) return Support.NO;
+       return Support.MAYBE;
+    }
+    /** 补丁三态：<2026-09-01 → YES；[2026-09-01, 2026-10-01) → MAYBE；否则 NO。 */
+    private static Support patchSupport() {
+        String patch = Build.VERSION.SECURITY_PATCH;
+        if (patch == null || patch.length() < 10) return Support.NO;
+        if (patch.compareTo(PATCH_MAYBE_START) < 0) return Support.YES;
+        if (patch.compareTo(PATCH_MAYBE_END) < 0) return Support.MAYBE;
+        return Support.NO;
+    }
+
+    /** 内核三态：低于所属分支修复版本 → YES；等于或高于 → MAYBE；解析失败 → NO。 */
+    private static Support kernelSupport() {
+        int[] kv = kernelMajorMinorPatch();
+        if (kv == null) return Support.NO;
+        int major = kv[0], minor = kv[1], patch = kv[2];
+        // 找所属分支
+        int[] fix = null;
+        for (int[] f : KERNEL_FIX) {
+            if (f[0] == major && f[1] == minor) { fix = f; break; }
+        }
+        if (fix == null) {
+            // 不在已知分支内：低于 5.10 视为 YES，高于 7.0 视为 MAYBE
+            if (major < 5 || (major == 5 && minor < 10)) return Support.YES;
+            if (major > 7 || (major == 7 && minor > 0)) return Support.MAYBE;
+            // 5.11~5.14 / 6.2~6.5 / 6.7~6.11 等中间分支：保守给 YES
+            return Support.YES;
+        }
+        int cmp = compareKernel(major, minor, patch, fix[0], fix[1], fix[2]);
+        return cmp < 0 ? Support.YES : Support.MAYBE;
+    }
+
+    private static int compareKernel(int ma, int mi, int pa, int mb, int mib, int pb) {
+        if (ma != mb) return Integer.compare(ma, mb);
+        if (mi != mib) return Integer.compare(mi, mib);
+        return Integer.compare(pa, pb);
+    }
+
+    /** 从 os.version 解析 major.minor.patch。 */
+    private static int[] kernelMajorMinorPatch() {
+        try {
+            String v = System.getProperty("os.version", "");
+            java.util.regex.Matcher m = java.util.regex.Pattern
+                    .compile("^(\\d+)\\.(\\d+)(?:\\.(\\d+))?")
+                    .matcher(v.trim());
+            if (!m.find()) return null;
+            int major = Integer.parseInt(m.group(1));
+            int minor = Integer.parseInt(m.group(2));
+            int patch = m.group(3) != null ? Integer.parseInt(m.group(3)) : 0;
+            return new int[]{major, minor, patch};
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static boolean isSamsung() {
         return contains(Build.MANUFACTURER, "samsung") || contains(Build.BRAND, "samsung");
     }
 
-    /** Does the user have a PIN, pattern or password? That is the vault's lock. */
     private static boolean isLockScreenSecured(Context ctx) {
         KeyguardManager km = (KeyguardManager) ctx.getSystemService(Context.KEYGUARD_SERVICE);
         return km != null && km.isDeviceSecure();
     }
 
-    /** The Settings key that says maintenance mode is on, or null if none does. */
     private static String maintenanceModeKey(Context ctx) {
         for (String key : MAINTENANCE_KEYS) {
             try {
@@ -174,10 +200,7 @@ final class D2Status {
                         || isOn(Settings.Secure.getString(ctx.getContentResolver(), key))) {
                     return key;
                 }
-            } catch (Exception e) {
-                // A key we are not allowed to read is indistinguishable from one
-                // that is not there, which the detail line already admits.
-            }
+            } catch (Exception ignored) {}
         }
         return null;
     }
@@ -188,7 +211,6 @@ final class D2Status {
         return v.equals("1") || v.equalsIgnoreCase("true") || v.equalsIgnoreCase("on");
     }
 
-    /** SECURITY_PATCH is a "yyyy-MM-dd" string, so it compares as written. */
     private static boolean predatesLockdown() {
         String patch = Build.VERSION.SECURITY_PATCH;
         if (patch == null || patch.length() < 10) return true;
