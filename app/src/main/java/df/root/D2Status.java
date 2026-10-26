@@ -5,25 +5,19 @@ import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
 
+import androidx.annotation.StringRes;
+
 import java.util.Locale;
 
 final class D2Status {
 
     enum Dot { GREY, GREEN, RED }
 
-    /** 三态支持等级。 */
-    enum Support {
-        /** 漏洞存在，大概率可利用。 */
-        YES,
-        /** 内核已修或补丁处于过渡期，仍可能有用。 */
-        MAYBE,
-        /** 窗口外，不判断。 */
-        NO
-    }
+    enum Support { YES, MAYBE, NO }
 
     static final class Result {
-        final boolean supported;      // 是否参与红/绿判断（YES 或 MAYBE）
-        final Support support;        // 三态
+        final boolean supported;
+        final Support support;
         final boolean lockscreen;
         final boolean maintenance;
         final Dot dot;
@@ -39,27 +33,36 @@ final class D2Status {
             this.detail = detail;
         }
 
-        String lockscreenLabel() { return lockscreen ? "是" : "不"; }
-        String maintenanceLabel() { return maintenance ? "开" : "关"; }
+        @StringRes
+        int lockscreenLabelRes() {
+            return lockscreen ? R.string.value_yes : R.string.value_no;
+        }
 
-        String deviceLabel() {
+        @StringRes
+        int maintenanceLabelRes() {
+            return maintenance ? R.string.value_on : R.string.value_off;
+        }
+
+        @StringRes
+        int deviceLabelRes() {
             switch (support) {
-                case YES:   return "支持";
-                case MAYBE: return "可能支持";
-                default:    return "不支持";
+                case YES:   return R.string.value_supported;
+                case MAYBE: return R.string.value_maybe_supported;
+                default:    return R.string.value_unsupported;
             }
         }
     }
 
     private static final String[] MAINTENANCE_KEYS = {
-            "maintenance_mode", "maintenance_mode_status", "sec_maintenance_mode",
+            "maintenance_mode",
+            "maintenance_mode_status",
+            "sec_maintenance_mode",
     };
 
     private static final String FIRST_LOCKDOWN_PATCH = "2026-04-01";
-    private static final String PATCH_MAYBE_START   = "2026-09-01";
-    private static final String PATCH_MAYBE_END     = "2026-10-01"; // 不含
+    private static final String PATCH_MAYBE_START = "2026-09-01";
+    private static final String PATCH_MAYBE_END   = "2026-10-01";
 
-    // 内核分支 → 首个修复版本。key 形如 "5.10"，value {major, minor, patch}
     private static final int[][] KERNEL_FIX = {
             {5, 10, 255},
             {5, 15, 206},
@@ -73,21 +76,18 @@ final class D2Status {
     static Result read(Context ctx) {
         boolean samsung = isSamsung();
 
-        // 内核三态
         Support kernelSupport = kernelSupport();
-
-        // 补丁三态
         Support patchSupport = patchSupport();
 
-        // 合成：取更保守（YES > MAYBE > NO）
         Support support;
-        if (samsung) {
-            // 三星仍走原规则：补丁 >= 2026-04-01 才参与判断
-            support = predatesLockdown() ? Support.NO : Support.MAYBE;
-            // 三星补丁在 9 月前视为 YES
-            if (!predatesLockdown()) {
-                Support ps = patchSupport;
-                support = (ps == Support.YES) ? Support.YES : Support.MAYBE;
+        if (kernelBelow510()) {
+            // 内核低于 5.10：直接不支持，不再看补丁
+            support = Support.NO;
+        } else if (samsung) {
+            if (predatesLockdown()) {
+                support = Support.NO;
+            } else {
+                support = (patchSupport == Support.YES) ? Support.YES : Support.MAYBE;
             }
         } else {
             support = combine(kernelSupport, patchSupport);
@@ -106,6 +106,7 @@ final class D2Status {
                 .append(", patch ").append(Build.VERSION.SECURITY_PATCH)
                 .append(", kernel ").append(System.getProperty("os.version", "?"))
                 .append(": samsung=").append(samsung)
+                .append(" below510=").append(kernelBelow510())
                 .append(" kernelSupport=").append(kernelSupport)
                 .append(" patchSupport=").append(patchSupport)
                 .append(" final=").append(support)
@@ -120,18 +121,22 @@ final class D2Status {
         return new Result(supported, support, secure, maintenance, dot, d.toString());
     }
 
-    /**
-    * 合成内核与补丁两项支持等级：
-    *   - 两项都 YES → YES
-    *   - 两项都 NO  → NO
-    *   - 其余（一项 YES 一项 NO、含 MAYBE）→ MAYBE
-     */
-    private static Support combine(Support a, Support b) {
-       if (a == Support.YES && b == Support.YES) return Support.YES;
-       if (a == Support.NO && b == Support.NO) return Support.NO;
-       return Support.MAYBE;
+    /** 内核低于 5.10：直接不支持。解析失败按"低于"处理（保守）。 */
+    private static boolean kernelBelow510() {
+        int[] kv = kernelMajorMinorPatch();
+        if (kv == null) return true;
+        int major = kv[0], minor = kv[1];
+        if (major < 5) return true;
+        if (major == 5 && minor < 10) return true;
+        return false;
     }
-    /** 补丁三态：<2026-09-01 → YES；[2026-09-01, 2026-10-01) → MAYBE；否则 NO。 */
+
+    private static Support combine(Support a, Support b) {
+        if (a == Support.YES && b == Support.YES) return Support.YES;
+        if (a == Support.NO && b == Support.NO) return Support.NO;
+        return Support.MAYBE;
+    }
+
     private static Support patchSupport() {
         String patch = Build.VERSION.SECURITY_PATCH;
         if (patch == null || patch.length() < 10) return Support.NO;
@@ -140,21 +145,18 @@ final class D2Status {
         return Support.NO;
     }
 
-    /** 内核三态：低于所属分支修复版本 → YES；等于或高于 → MAYBE；解析失败 → NO。 */
     private static Support kernelSupport() {
         int[] kv = kernelMajorMinorPatch();
         if (kv == null) return Support.NO;
         int major = kv[0], minor = kv[1], patch = kv[2];
-        // 找所属分支
+
         int[] fix = null;
         for (int[] f : KERNEL_FIX) {
             if (f[0] == major && f[1] == minor) { fix = f; break; }
         }
         if (fix == null) {
-            // 不在已知分支内：低于 5.10 视为 YES，高于 7.0 视为 MAYBE
-            if (major < 5 || (major == 5 && minor < 10)) return Support.YES;
+            // 低于 5.10 已在 read() 短路；这里只剩 5.10 以上的未知分支
             if (major > 7 || (major == 7 && minor > 0)) return Support.MAYBE;
-            // 5.11~5.14 / 6.2~6.5 / 6.7~6.11 等中间分支：保守给 YES
             return Support.YES;
         }
         int cmp = compareKernel(major, minor, patch, fix[0], fix[1], fix[2]);
@@ -167,7 +169,6 @@ final class D2Status {
         return Integer.compare(pa, pb);
     }
 
-    /** 从 os.version 解析 major.minor.patch。 */
     private static int[] kernelMajorMinorPatch() {
         try {
             String v = System.getProperty("os.version", "");

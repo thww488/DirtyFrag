@@ -1,45 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- TwoStepProgressView -->
-    <string name="progress_waiting">等待中</string>
-    <string name="progress_verification">验证中</string>
-    <!-- 按钮 -->
-    <string name="btn_are_you_sure">你确定吗</string>
-    <string name="btn_running">运行中</string>
-    <string name="btn_run_exploit">运行漏洞利用</string>
-    <string name="btn_rooted">已Root</string>
+    <string name="progress_waiting">Waiting</string>
+    <string name="progress_verification">Verification</string>
+    <string name="state_verified">Verified</string>
+    <string name="state_failed">Failed</string>
+    <string name="state_reboot">Reboot</string>
+    <string name="state_failure">Failure</string>
 
-    <!-- 状态 -->
-    <string name="state_verified">已验证</string>
-    <string name="state_failed">失败</string>
-    <string name="state_reboot">重启</string>
-    <string name="state_failure">失败</string>
+    <!-- Run button -->
+    <string name="btn_are_you_sure">Are you sure?</string>
+    <string name="btn_running">Running</string>
+    <string name="btn_run_exploit">Run exploit</string>
+    <string name="btn_rooted">Rooted</string>
 
-    <!-- 模块 -->
-    <string name="modules_enabled">已启用 - 在下次重新挂载时生效</string>
-    <string name="modules_disabled">已禁用 - 在重新Root时没有模块</string>
+    <!-- Modules -->
+    <string name="modules_enabled">Enabled - Active at next reroot</string>
+    <string name="modules_disabled">Disabled - No modules on reroot</string>
 
-    <!-- SU 管理器 -->
-    <string name="su_manager_not_selected">未选择 - 必需</string>
+    <!-- SU manager -->
+    <string name="su_manager_not_selected">Not selected - required</string>
     <string name="su_manager_selected">%1$s  (%2$s)</string>
-    <string name="no_su_manager_found">未找到包含 libeexgslcpwg.so 或 libksud.so 的应用</string>
+    <string name="no_su_manager_found">No app with libeexgslcpwg.so or libksud.so found</string>
 
-    <!-- 菜单 -->
-    <string name="menu_github">Github页面</string>
-    <string name="menu_expert_mode">专家模式</string>
-    <string name="menu_reset_layout">重置布局</string>
+    <!-- Overflow menu -->
+    <string name="menu_github">GitHub page</string>
+    <string name="menu_expert_mode">Expert mode</string>
+    <string name="menu_reset_layout">Reset layout</string>
 
-    <!-- 专家模式 -->
-    <string name="autorun_title">自动运行</string>
-    <string name="autorun_title_expert">自动运行(专家)</string>
-    <string name="reboot_title">自动重启</string>
-    <string name="reboot_title_expert">自动重启(专家)</string>
+    <!-- Expert mode -->
+    <string name="autorun_title">Auto-run</string>
+    <string name="autorun_title_expert">Auto-run (Expert)</string>
+    <string name="reboot_title">Auto-reboot</string>
+    <string name="reboot_title_expert">Auto-reboot (Expert)</string>
 
-    <!-- Odin 弹窗 -->
-    <string name="row_lockscreen">锁屏</string>
-    <string name="row_maintenance">维护模式</string>
-    <string name="row_device">设备</string>
+    <!-- Odin submenu -->
+    <string name="row_lockscreen">Lockscreen</string>
+    <string name="row_maintenance">Maintenance</string>
+    <string name="row_device">Device</string>
 
-    <!-- 无障碍 -->
-    <string name="cd_hide_card">隐藏卡片</string>
+    <!-- Odin values -->
+    <string name="value_yes">Yes</string>
+    <string name="value_no">No</string>
+    <string name="value_on">On</string>
+    <string name="value_off">Off</string>
+    <string name="value_supported">Supported</string>
+    <string name="value_maybe_supported">Maybe supported</string>
+    <string name="value_unsupported">Unsupported</string>
+
+    <string name="update_label">Update</string>
+    <string name="su_manager_title">SU manager</string>
+    <string name="autorun_desc">Run the exploit on boot</string>
+    <string name="reboot_desc">Soft reboot after root</string>
+    <string name="modules_title">KernelSU modules</string>
+    <string name="advanced_log_title">Show advanced log</string>
+    <string name="advanced_log_desc">Show the full scrollable log</string>
+    <string name="ksu_label">SU manager</string>
+
+    <string name="cd_menu">Menu</string>
+    <string name="cd_update_pill">Update available, open the release page</string>
+    <string name="cd_odin_pill">Odin download mode availability</string>
+    <string name="cd_select">Select</string>
+    <string name="cd_open_su_manager">Open SU manager</string>
+    <string name="cd_open">Open</string>
+    <string name="cd_save_log">Save log to Downloads</string>
+
+    <!-- Accessibility -->
+    <string name="cd_hide_card">Hide card</string>
 </resources>

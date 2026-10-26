@@ -31,7 +31,7 @@
                 android:layout_gravity="end|center_vertical"
                 android:layout_marginEnd="16dp"
                 android:background="@drawable/bg_circle"
-                android:contentDescription="Menu"
+                android:contentDescription="@string/cd_menu"
                 android:scaleType="center"
                 android:src="@drawable/ic_more" />
 
@@ -60,7 +60,7 @@
                 android:layout_marginStart="32dp"
                 android:background="@drawable/bg_update_pill"
                 android:clickable="true"
-                android:contentDescription="Update available, open the release page"
+                android:contentDescription="@string/cd_update_pill"
                 android:focusable="true"
                 android:visibility="gone">
 
@@ -73,7 +73,7 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="start|center_vertical"
                     android:gravity="center"
-                    android:text="更新"
+                    android:text="@string/update_label"
                     android:textColor="#FF101418"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -105,7 +105,7 @@
                 android:layout_marginEnd="6dp"
                 android:background="@drawable/bg_odin_pill"
                 android:clickable="true"
-                android:contentDescription="Odin download mode availability"
+                android:contentDescription="@string/cd_odin_pill"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:minWidth="44dp"
@@ -203,7 +203,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="SU 管理器"
+                    android:text="@string/su_manager_title"
                     android:textColor="#FFFFFFFF"
                     android:textSize="16sp" />
 
@@ -211,7 +211,7 @@
                     android:id="@+id/suManagerSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="未选择 - 必填"
+                    android:text="@string/su_manager_not_selected"
                     android:textColor="#FF9E9E9E"
                     android:textSize="12sp" />
 
@@ -222,7 +222,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="center_vertical"
-                android:contentDescription="Select"
+                android:contentDescription="@string/cd_select"
                 android:src="@drawable/ic_chevron" />
 
         </LinearLayout>
@@ -265,7 +265,7 @@
                         android:id="@+id/tvAutorunTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="自动运行"
+                        android:text="@string/autorun_title"
                         android:textColor="#FFFFFFFF"
                         android:textSize="16sp" />
 
@@ -273,7 +273,7 @@
                         android:id="@+id/tvAutorunDesc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="启动后运行漏洞利用程序"
+                        android:text="@string/autorun_desc"
                         android:textColor="#FF9E9E9E"
                         android:textSize="12sp" />
 
@@ -305,7 +305,7 @@
                         android:id="@+id/tvRebootTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="自动重启"
+                        android:text="@string/reboot_title"
                         android:textColor="#FFFFFFFF"
                         android:textSize="16sp" />
 
@@ -313,7 +313,7 @@
                         android:id="@+id/tvRebootDesc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Root 后软重启"
+                        android:text="@string/reboot_desc"
                         android:textColor="#FF9E9E9E"
                         android:textSize="12sp" />
 
@@ -361,7 +361,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="KernelSU 模块"
+                    android:text="@string/modules_title"
                     android:textColor="#FFFFFFFF"
                     android:textSize="16sp" />
 
@@ -369,7 +369,7 @@
                     android:id="@+id/modulesSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="已启用 - 下次重启时生效"
+                    android:text="@string/modules_enabled"
                     android:textColor="#FF9E9E9E"
                     android:textSize="12sp" />
 
@@ -416,14 +416,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="显示高级日志"
+                    android:text="@string/advanced_log_title"
                     android:textColor="#FFFFFFFF"
                     android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="显示完整可滚动日志"
+                    android:text="@string/advanced_log_desc"
                     android:textColor="#FF9E9E9E"
                     android:textSize="12sp" />
 
@@ -532,7 +532,7 @@
         android:paddingEnd="28dp"
         android:elevation="12dp"
         android:stateListAnimator="@null"
-        android:text="运行漏洞利用"
+        android:text="@string/btn_run_exploit"
         android:textSize="14sp"
         android:backgroundTint="#FF7A7A7A"
         android:textColor="#FFE0E0E0"
@@ -562,7 +562,7 @@
         android:background="@drawable/bg_pill"
         android:backgroundTint="#FF2E2E30"
         android:clickable="true"
-        android:contentDescription="Open SU manager"
+        android:contentDescription="@string/cd_open_su_manager"
         android:elevation="12dp"
         android:enabled="false"
         android:focusable="true"
@@ -584,7 +584,7 @@
             android:layout_gravity="start|center_vertical"
             android:layout_marginStart="22dp"
             android:alpha="0"
-            android:text="SU管理器"
+            android:text="@string/ksu_label"
             android:textColor="#FF1F1F1F"
             android:textSize="14sp" />
 
@@ -594,7 +594,7 @@
             android:layout_height="20dp"
             android:layout_gravity="end|center_vertical"
             android:layout_marginEnd="17dp"
-            android:contentDescription="Open"
+            android:contentDescription="@string/cd_open"
             android:src="@drawable/ic_chevron" />
 
     </FrameLayout>
@@ -612,7 +612,7 @@
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="28dp"
         android:background="@drawable/bg_circle_grey_ripple"
-        android:contentDescription="Save log to Downloads"
+        android:contentDescription="@string/cd_save_log"
         android:elevation="12dp"
         android:padding="0dp"
         android:scaleType="center"
@@ -638,4 +638,3 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
- 

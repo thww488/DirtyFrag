@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TwoStepProgressView -->
+    <string name="progress_waiting">等待中</string>
+    <string name="progress_verification">验证中</string>
+    <string name="state_verified">已验证</string>
+    <string name="state_failed">失败</string>
+    <string name="state_reboot">重启</string>
+    <string name="state_failure">失败</string>
+
+    <!-- 运行按钮 -->
+    <string name="btn_are_you_sure">你确定吗</string>
+    <string name="btn_running">运行中</string>
+    <string name="btn_run_exploit">运行漏洞利用</string>
+    <string name="btn_rooted">已Root</string>
+
+    <!-- 模块 -->
+    <string name="modules_enabled">已启用 - 在下次重新挂载时生效</string>
+    <string name="modules_disabled">已禁用 - 在重新Root时没有模块</string>
+
+    <!-- SU 管理器 -->
+    <string name="su_manager_not_selected">未选择 - 必需</string>
+    <string name="su_manager_selected">%1$s  (%2$s)</string>
+    <string name="no_su_manager_found">未找到包含 libeexgslcpwg.so 或 libksud.so 的应用</string>
+
+    <!-- 溢出菜单 -->
+    <string name="menu_github">Github页面</string>
+    <string name="menu_expert_mode">专家模式</string>
+    <string name="menu_reset_layout">重置布局</string>
+
+    <!-- 专家模式 -->
+    <string name="autorun_title">自动运行</string>
+    <string name="autorun_title_expert">自动运行(专家)</string>
+    <string name="reboot_title">自动重启</string>
+    <string name="reboot_title_expert">自动重启(专家)</string>
+
+    <!-- Odin 子菜单 -->
+    <string name="row_lockscreen">锁屏</string>
+    <string name="row_maintenance">维护模式</string>
+    <string name="row_device">设备</string>
+
+    <!-- Odin 值 -->
+    <string name="value_yes">是</string>
+    <string name="value_no">不</string>
+    <string name="value_on">开</string>
+    <string name="value_off">关</string>
+    <string name="value_supported">支持</string>
+    <string name="value_maybe_supported">可能支持</string>
+    <string name="value_unsupported">不支持</string>
+    
+    <!-- 新增：XML 里的标题/描述 -->
+    <string name="update_label">更新</string>
+    <string name="su_manager_title">SU 管理器</string>
+    <string name="autorun_desc">启动后运行漏洞利用程序</string>
+    <string name="reboot_desc">Root 后软重启</string>
+    <string name="modules_title">KernelSU 模块</string>
+    <string name="advanced_log_title">显示高级日志</string>
+    <string name="advanced_log_desc">显示完整可滚动日志</string>
+    <string name="ksu_label">SU管理器</string>
+
+    <!-- 新增：无障碍描述 -->
+    <string name="cd_menu">菜单</string>
+    <string name="cd_update_pill">有更新，打开发布页面</string>
+    <string name="cd_odin_pill">Odin 下载模式可用性</string>
+    <string name="cd_select">选择</string>
+    <string name="cd_open_su_manager">打开 SU 管理器</string>
+    <string name="cd_open">打开</string>
+    <string name="cd_save_log">保存日志到下载目录</string>
+
+    <!-- 无障碍 -->
+    <string name="cd_hide_card">隐藏卡片</string>
+</resources>

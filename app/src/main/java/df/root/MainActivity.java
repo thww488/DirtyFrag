@@ -1521,11 +1521,14 @@ public class MainActivity extends AppCompatActivity implements IReporter {
         box.setBackgroundResource(R.drawable.popup_bg);
         box.setPadding(0, (int) (6 * md), 0, (int) (6 * md));
 
-        box.addView(odinRow(getString(R.string.row_lockscreen), shown.lockscreenLabel()), odinRowLp(md));
+        box.addView(odinRow(getString(R.string.row_lockscreen),
+        getString(shown.lockscreenLabelRes())), odinRowLp(md));
         box.addView(odinSep(md), odinSepLp(md));
-        box.addView(odinRow(getString(R.string.row_maintenance), shown.maintenanceLabel()), odinRowLp(md));
+        box.addView(odinRow(getString(R.string.row_maintenance),
+        getString(shown.maintenanceLabelRes())), odinRowLp(md));
         box.addView(odinSep(md), odinSepLp(md));
-        box.addView(odinRow(getString(R.string.row_device), shown.deviceLabel()), odinRowLp(md));
+        box.addView(odinRow(getString(R.string.row_device),
+        getString(shown.deviceLabelRes())), odinRowLp(md));
 
         box.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         int pw_w = Math.max(box.getMeasuredWidth(), (int) (230 * md));
