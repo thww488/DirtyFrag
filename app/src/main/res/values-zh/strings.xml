@@ -21,7 +21,7 @@
     <!-- SU 管理器 -->
     <string name="su_manager_not_selected">未选择 - 必需</string>
     <string name="su_manager_selected">%1$s  (%2$s)</string>
-    <string name="no_su_manager_found">未找到包含 libeexgslcpwg.so 或 libksud.so 的应用</string>
+    <string name="no_su_manager_found">未找到包含 libksud.so 的应用</string>
 
     <!-- 溢出菜单 -->
     <string name="menu_github">Github页面</string>

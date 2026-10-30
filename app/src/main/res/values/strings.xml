@@ -21,7 +21,7 @@
     <!-- SU manager -->
     <string name="su_manager_not_selected">Not selected - required</string>
     <string name="su_manager_selected">%1$s  (%2$s)</string>
-    <string name="no_su_manager_found">No app with libeexgslcpwg.so or libksud.so found</string>
+    <string name="no_su_manager_found">No app with libksud.so found</string>
 
     <!-- Overflow menu -->
     <string name="menu_github">GitHub page</string>
